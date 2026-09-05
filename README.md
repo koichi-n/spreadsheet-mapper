@@ -120,8 +120,16 @@ gh repo create spreadsheet-mapper --private --source=. --remote=origin --push
 
 1. [Vercel Dashboard](https://vercel.com/new) を開く
 2. 「Import Git Repository」でこのリポジトリを選ぶ（初回は GitHub 連携の許可が必要）
-3. Framework Preset は **Next.js** のままでよい（Build Command: `next build`）
-4. 先に環境変数を入れてから Deploy する（次項）
+3. リポジトリが一覧に出ない場合は、[GitHub の Vercel App 設定](https://github.com/settings/installations) で `spreadsheet-mapper` への Repository access を許可する
+4. Framework Preset は **Next.js** のままでよい（Build Command: `next build`）
+5. 先に環境変数を入れてから Deploy する（次項）
+
+既存の Vercel プロジェクトに後から接続する場合:
+
+```bash
+npx vercel link --yes --project spreadsheet-mapper --scope koichi-ns-projects
+npx vercel git connect https://github.com/koichi-n/spreadsheet-mapper.git --yes --scope koichi-ns-projects
+```
 
 ### 6.3. Vercel 側の環境変数
 
