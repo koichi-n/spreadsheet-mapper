@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles.css";
 
 :root {
   color-scheme: light;
@@ -22,17 +23,4 @@ body {
 :focus-visible {
   outline: 2px solid #0f172a;
   outline-offset: 2px;
-}
-
-.pref-shape:focus {
-  outline: none;
-}
-
-.pref-shape:focus-visible {
-  stroke: #0f172a;
-  stroke-width: 2.4;
-}
-
-.pref-shape-geo:focus-visible {
-  stroke-width: 1.5;
 }

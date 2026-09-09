@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import japanMap from "@svg-maps/japan";
-import { MapTooltip, pointerPosition } from "@/components/maps/MapTooltip";
-import type { JapanMapViewProps } from "@/components/maps/types";
-import { SVG_MAP_ID_TO_PREF_CODE } from "@/lib/map-style";
-import { getPrefectureColors, getStatusConfig } from "@/lib/status-config";
+import { MapTooltip, pointerPosition } from "./MapTooltip";
+import type { JapanMapViewProps } from "./types";
+import { SVG_MAP_ID_TO_PREF_CODE } from "../../lib/map-style";
+import { getAreaColors, getStatusConfig } from "../../lib/status-config";
 
 const GEO_LOCATIONS = japanMap.locations.flatMap((location) => {
   const prefCode = SVG_MAP_ID_TO_PREF_CODE[location.id];
@@ -23,6 +23,7 @@ export function GeographicJapanMap({
   prefectures,
   selectedCode,
   onSelect,
+  mapLabel = "日本地図。各都道府県を選ぶと詳細を表示します",
 }: JapanMapViewProps) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(
@@ -41,7 +42,7 @@ export function GeographicJapanMap({
       <svg
         viewBox={japanMap.viewBox}
         role="group"
-        aria-label="日本地図。各都道府県を選択できます"
+        aria-label={mapLabel}
         className="mx-auto h-auto w-full max-w-xl"
       >
         <rect
@@ -56,7 +57,7 @@ export function GeographicJapanMap({
         {GEO_LOCATIONS.map((location) => {
           const record = prefectures[location.prefCode];
           if (!record) return null;
-          const colors = getPrefectureColors(record);
+          const colors = getAreaColors(record);
           const status = getStatusConfig(record.status);
           const isSelected = selectedCode === location.prefCode;
           const valueText =
@@ -70,7 +71,7 @@ export function GeographicJapanMap({
               role="button"
               tabIndex={0}
               aria-pressed={isSelected}
-              aria-label={`${record.prefecture}、ステータス ${status.label}、${valueText}`}
+              aria-label={`${record.name}、ステータス ${status.label}、${valueText}`}
               d={location.path}
               fill={colors.fill}
               stroke={isSelected ? "#0F172A" : "#FFFFFF"}

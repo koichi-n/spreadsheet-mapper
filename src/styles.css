@@ -1,0 +1,26 @@
+/* Map focus styles used by spreadsheet-mapper SVG regions.
+   Import this from the consuming app:
+   import "spreadsheet-mapper/styles.css";
+*/
+
+.pref-shape:focus {
+  outline: none;
+}
+
+.pref-shape:focus-visible {
+  stroke: #0f172a;
+  stroke-width: 2.4;
+}
+
+.pref-shape-geo:focus-visible {
+  stroke-width: 1.5;
+}
+
+.muni-shape:focus {
+  outline: none;
+}
+
+.muni-shape:focus-visible {
+  outline: 2px solid #0f172a;
+  outline-offset: 1px;
+}

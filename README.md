@@ -1,14 +1,18 @@
 # Spreadsheet Mapper
 
-Googleスプレッドシートを簡易CMSとして使い、47都道府県のデータを日本地図に色分け表示するWebアプリケーションです。
+Googleスプレッドシートを簡易CMSとして使い、都道府県・市区町村のデータを日本地図に色分け表示するライブラリです。このリポジトリ自身がデモアプリにもなっています。
 
-都道府県の紐付けには都道府県名ではなく、JIS都道府県コード（`01`〜`47`）を使います。
+地域の紐付けには名称ではなく、全国地方公共団体コードを使います。都道府県は2桁（`01`〜`47`）、市区町村は5桁（例: `13101` 千代田区）です。
+
+表示単位を「都道府県」と「市区町村」で切り替えられます。都道府県単位では全国比較と詳細表示、市区町村単位では選んだ都道府県の中をさらに絞り込みます。
 
 ## できること
 
 - 47都道府県の実地図（既定）とデフォルメ地図を切り替えて表示する
+- 表示単位を都道府県 / 市区町村で切り替える
+- 都道府県を選ぶと詳細を表示し、市区町村単位へ切り替えるとその都道府県の地図が開く
 - `status`（A / B / C / 情報なし）で色分けする
-- 都道府県をクリック / タップすると詳細を表示する
+- 市区町村をクリック / タップすると詳細を表示する
 - 地図を使わず、一覧からも選択できる
 - Google Sheets の更新を数分以内に反映する（キャッシュあり）
 
@@ -169,27 +173,144 @@ npx vercel --prod # Production
 
 1行目はヘッダーです。列順は変更しても、ヘッダー名で読み取ります。
 
+市区町村データを使う場合（推奨）:
+
+| muni_code | municipality | status | value | description | source_url | updated_at |
+| --- | --- | --- | --- | --- | --- | --- |
+| 01100 | 札幌市 | A | 85 | 詳細説明 | https://example.com | 2026-09-01 |
+| 13101 | 千代田区 | B | 63 | 詳細説明 | https://example.com | 2026-09-01 |
+
+都道府県データだけでも動きます（従来どおり）:
+
 | pref_code | prefecture | status | value | description | source_url | updated_at |
 | --- | --- | --- | --- | --- | --- | --- |
 | 01 | 北海道 | A | 85 | 詳細説明 | https://example.com | 2026-09-01 |
-| 02 | 青森県 | B | 63 | 詳細説明 | https://example.com | 2026-09-01 |
+| 13 | 東京都 | B | 63 | 詳細説明 | https://example.com | 2026-09-01 |
 
-- `pref_code` は JIS都道府県コード `01`〜`47`（地図との紐付けキー）
+- `muni_code` は全国地方公共団体コード5桁（地図との紐付けキー）。Excelで先頭ゼロが落ちても復元します。チェックデジット付き6桁も先頭5桁として読みます
+- `pref_code` は JIS都道府県コード `01`〜`47`
+- 単一の `code` 列でも可。2桁なら都道府県、5桁（または6桁）なら市区町村と判定します
+- 両方の行を混在させられます。都道府県行があれば全国地図の色に使い、市区町村行は市区町村表示に使います。都道府県行がなければ、市区町村の多数派ステータスで全国地図を塗ります
 - `status` は `A` / `B` / `C`。それ以外や空欄は「情報なし」
 - `value` は数値。空欄や不正な値は表示上 `—`
 - `source_url` は `http` / `https` のみリンク化する
 - 一部の行だけ壊れても、サイト全体は表示を続ける
 - 将来列を増やしても、未知の列は無視される
 
+政令指定都市は **市コード** で紐付けます（例: 札幌市 `01100`）。行政区コード（`01101` など）は地図に出ません。東京23区は特別区なので区コード（`13101` 〜 `13123`）を使います。
+
 シート名が `Sheet1` でない場合は `GOOGLE_SHEET_RANGE` を変更してください。例: `データ!A:Z`
 
 ## 地図の出典 / ライセンス
 
-既定の地図は [@svg-maps/japan](https://github.com/VictorCazanave/svg-maps/tree/master/packages/japan) です。MapSVG の日本地図を基にしており、ライセンスは **CC BY 4.0** です。
+既定の全国地図は [@svg-maps/japan](https://github.com/VictorCazanave/svg-maps/tree/master/packages/japan) です。MapSVG の日本地図を基にしており、ライセンスは **CC BY 4.0** です。
 
 デフォルメ地図も残してあり、画面上の「実地図 / デフォルメ」で切り替えられます。デフォルメ地図は [デフォルメ日本地図 by chizutodesign](https://github.com/chizutodesign/japan-deformed-map) で、ライセンスは **CC0 1.0** です。
 
+市区町村界は [jpn-atlas](https://github.com/biskwikman/jpn-atlas)（**BSD-3-Clause**）です。国土地理院「地球地図日本 2016」を加工したもので、2016年時点の市区町村です。合併などで現行と異なる場合があります。地図JSONを再生成する場合:
+
+```bash
+npm run build:maps
+```
+
 初期表示をデフォルメに戻す場合は `src/lib/map-style.ts` の `MAP_STYLE` を `'deformed'` に変更してください。
+
+## ライブラリとして使う
+
+別の Next.js アプリ（例: 団体サイト）からは、このパッケージを依存として入れ、**そのアプリの中で**地図を描画します。コアのデプロイ先へ地図を取りに行く構成ではありません。
+
+npm 公開前はローカルパスか GitHub で足します。
+
+```bash
+npm install ../spreadsheet-mapper
+```
+
+```json
+{
+  "dependencies": {
+    "spreadsheet-mapper": "file:../spreadsheet-mapper"
+  }
+}
+```
+
+Next.js 側でパッケージをトランスパイルします。
+
+```ts
+// next.config.ts
+const nextConfig = {
+  transpilePackages: ["spreadsheet-mapper"],
+};
+
+export default nextConfig;
+```
+
+Tailwind CSS v4 では、コアのクラスが消えないようソースを足します。
+
+```css
+@import "tailwindcss";
+@import "spreadsheet-mapper/styles.css";
+@source "../node_modules/spreadsheet-mapper/src";
+```
+
+市区町村の境界 JSON はコアの `public/municipality-maps/` にあります。利用側の `public` へコピーしてください。
+
+```bash
+npx spreadsheet-mapper-copy-maps public/municipality-maps
+```
+
+サーバー用とクライアント用は入口を分けます（混ぜると Client Component がサーバーコードを巻き込みます）。
+
+```tsx
+// app/maps/[slug]/page.tsx （Server Component）
+import { getAreaData } from "spreadsheet-mapper/server";
+import { MapApp } from "spreadsheet-mapper/client";
+
+export default async function Page() {
+  const sheet = {
+    useMockData: true,
+    sheetId: "...",
+    sheetRange: "Sheet1!A:Z",
+    serviceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    privateKey: process.env.GOOGLE_PRIVATE_KEY,
+  };
+  const data = await getAreaData(sheet);
+
+  return (
+    <MapApp
+      prefectures={data.prefectures}
+      source={data.source}
+      fetchedAt={data.fetchedAt}
+      error={data.error}
+      warnings={data.warnings}
+      showHeader={false}
+      municipalitiesPathTemplate="/api/maps/your-slug/municipalities/{prefCode}"
+    />
+  );
+}
+```
+
+市区町村の Route Handler では、同じシート設定で `getMunicipalitiesForPref` を呼びます。データセットが複数あるときは、シートごとに options を変えます。
+
+```ts
+import { getMunicipalitiesForPref, isPrefCode } from "spreadsheet-mapper/server";
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ prefCode: string }> },
+) {
+  const { prefCode } = await params;
+  if (!isPrefCode(prefCode)) {
+    return Response.json({ error: "invalid pref code" }, { status: 400 });
+  }
+  const records = await getMunicipalitiesForPref(prefCode, {
+    useMockData: true,
+    sheetId: "...",
+  });
+  return Response.json({ records });
+}
+```
+
+`getAreaData` に渡す認証・シート ID は利用側の環境変数です。コア側の `.env` はデモアプリ専用です。
 
 ## 色の変更
 

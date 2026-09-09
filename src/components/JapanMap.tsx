@@ -1,52 +1,49 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { DeformedJapanMap } from "@/components/maps/DeformedJapanMap";
-import { GeographicJapanMap } from "@/components/maps/GeographicJapanMap";
-import type { JapanMapViewProps } from "@/components/maps/types";
-import { MAP_ATTRIBUTIONS, type MapStyle } from "@/lib/map-style";
+import { DeformedJapanMap } from "./maps/DeformedJapanMap";
+import { GeographicJapanMap } from "./maps/GeographicJapanMap";
+import type { JapanMapViewProps } from "./maps/types";
+import { SegmentedControl } from "./SegmentedControl";
+import { MAP_ATTRIBUTIONS, type MapStyle } from "../lib/map-style";
 
 type JapanMapProps = JapanMapViewProps & {
   mapStyle: MapStyle;
   onMapStyleChange: (style: MapStyle) => void;
+  selectHint: string;
 };
 
 export function JapanMap({
   mapStyle,
   onMapStyleChange,
+  selectHint,
+  mapLabel,
   ...viewProps
 }: JapanMapProps) {
+  const styleHint =
+    mapStyle === "geographic"
+      ? "実際の形に近い日本地図です。"
+      : "比較しやすいデフォルメ地図です。";
+
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-600">
-          {mapStyle === "geographic"
-            ? "実際の形に近い日本地図です。小さい都府県は一覧からも選べます。"
-            : "比較しやすいデフォルメ地図です。"}
+          {styleHint} {selectHint}
         </p>
-        <div
-          className="inline-flex rounded-lg bg-slate-100 p-1 text-sm"
-          role="group"
-          aria-label="地図の種類"
-        >
-          <StyleButton
-            active={mapStyle === "geographic"}
-            onClick={() => onMapStyleChange("geographic")}
-          >
-            実地図
-          </StyleButton>
-          <StyleButton
-            active={mapStyle === "deformed"}
-            onClick={() => onMapStyleChange("deformed")}
-          >
-            デフォルメ
-          </StyleButton>
-        </div>
+        <SegmentedControl
+          value={mapStyle}
+          onChange={onMapStyleChange}
+          ariaLabel="地図の種類"
+          options={[
+            { value: "geographic", label: "実地図" },
+            { value: "deformed", label: "デフォルメ" },
+          ]}
+        />
       </div>
       {mapStyle === "geographic" ? (
-        <GeographicJapanMap {...viewProps} />
+        <GeographicJapanMap mapLabel={mapLabel} {...viewProps} />
       ) : (
-        <DeformedJapanMap {...viewProps} />
+        <DeformedJapanMap mapLabel={mapLabel} {...viewProps} />
       )}
       <p className="mt-3 text-xs text-slate-500">
         出典:{" "}
@@ -61,30 +58,5 @@ export function JapanMap({
         （{MAP_ATTRIBUTIONS[mapStyle].license}）
       </p>
     </div>
-  );
-}
-
-function StyleButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`rounded-md px-3 py-1.5 font-medium transition ${
-        active
-          ? "bg-white text-slate-900 shadow-sm"
-          : "text-slate-600 hover:text-slate-900"
-      }`}
-    >
-      {children}
-    </button>
   );
 }

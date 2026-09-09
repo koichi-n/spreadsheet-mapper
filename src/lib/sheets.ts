@@ -1,16 +1,22 @@
 import { JWT } from "google-auth-library";
-import { APP_CONFIG } from "@/lib/app-config";
+import {
+  resolveAreaDataOptions,
+  type AreaDataOptions,
+} from "./area-data-options";
 
 function normalizePrivateKey(value: string | undefined): string | undefined {
   if (!value) return undefined;
   return value.replace(/\\n/g, "\n").replace(/^"|"$/g, "");
 }
 
-export async function fetchSheetRows(): Promise<string[][]> {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const key = normalizePrivateKey(process.env.GOOGLE_PRIVATE_KEY);
-  const sheetId = process.env.GOOGLE_SHEET_ID;
-  const range = process.env.GOOGLE_SHEET_RANGE ?? APP_CONFIG.sheetRange;
+export async function fetchSheetRows(
+  options: AreaDataOptions = {},
+): Promise<string[][]> {
+  const resolved = resolveAreaDataOptions(options);
+  const email = resolved.serviceAccountEmail;
+  const key = normalizePrivateKey(resolved.privateKey);
+  const sheetId = resolved.sheetId;
+  const range = resolved.sheetRange;
 
   if (!email || !key || !sheetId) {
     throw new Error("Google Sheets の環境変数が不足しています。");

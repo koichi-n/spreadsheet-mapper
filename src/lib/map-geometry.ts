@@ -1,4 +1,4 @@
-import gridData from "@/data/japan.grid.json";
+import gridData from "../data/japan.grid.json";
 
 export type PrefectureShape = {
   prefCode: string;

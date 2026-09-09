@@ -1,4 +1,4 @@
-import { STATUS_CONFIG, STATUS_ORDER } from "@/lib/status-config";
+import { STATUS_CONFIG, STATUS_ORDER } from "../lib/status-config";
 
 type MapLegendProps = {
   className?: string;

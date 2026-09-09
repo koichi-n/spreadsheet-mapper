@@ -1,12 +1,45 @@
 {
   "name": "spreadsheet-mapper",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
+  "description": "Google Sheets の地域データを日本地図（都道府県・市区町村）で色分け表示するライブラリ兼デモ",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./src/client.ts"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "default": "./src/server.ts"
+    },
+    "./styles.css": "./src/styles.css"
+  },
+  "files": [
+    "src",
+    "public/municipality-maps",
+    "scripts/copy-municipality-maps.mjs",
+    "README.md"
+  ],
+  "bin": {
+    "spreadsheet-mapper-copy-maps": "./scripts/copy-municipality-maps.mjs"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:maps": "node scripts/build-municipality-maps.mjs",
+    "copy-maps": "node scripts/copy-municipality-maps.mjs"
+  },
+  "peerDependencies": {
+    "next": ">=15",
+    "react": ">=19",
+    "react-dom": ">=19"
   },
   "dependencies": {
     "@svg-maps/japan": "^2.0.0",
@@ -20,9 +53,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "d3-geo": "^3.1.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "jpn-atlas": "^1.0.2",
     "tailwindcss": "^4",
+    "topojson-client": "^3.1.0",
     "typescript": "^5"
   }
 }

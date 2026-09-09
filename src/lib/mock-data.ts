@@ -1,33 +1,30 @@
-import { PREFECTURES } from "@/lib/prefectures";
-import { toSafeHttpUrl } from "@/lib/safe-url";
-import type { PrefectureRecord, StatusKey } from "@/lib/types";
+import { MUNICIPALITIES } from "./municipality-catalog";
+import { toSafeHttpUrl } from "./safe-url";
+import type { AreaRecord, StatusKey } from "./types";
 
 const STATUS_CYCLE: StatusKey[] = ["A", "B", "C"];
-const UNKNOWN_CODES = new Set(["10", "25", "47"]);
 
-export function getMockPrefectureRecords(): PrefectureRecord[] {
-  return PREFECTURES.map((pref) => {
-    const codeNum = Number(pref.code);
-    const isUnknown = UNKNOWN_CODES.has(pref.code);
+export function getMockAreaRecords(): AreaRecord[] {
+  return MUNICIPALITIES.map((muni) => {
+    const codeNum = Number(muni.code);
+    const isUnknown = codeNum % 17 === 0;
     const status: StatusKey = isUnknown
       ? "unknown"
       : STATUS_CYCLE[codeNum % 3];
 
     return {
-      prefCode: pref.code,
-      prefecture: pref.name,
+      code: muni.code,
+      level: "municipality",
+      prefCode: muni.prefCode,
+      name: muni.name,
       status,
-      value: isUnknown || pref.code === "15" ? null : 40 + ((codeNum * 7) % 61),
-      description: isUnknown
-        ? ""
-        : `${pref.name}のサンプル説明です。モックデータを表示しています。`,
+      value: isUnknown ? null : 40 + (codeNum % 61),
+      description: isUnknown ? "" : `${muni.name}のサンプル説明です。`,
       sourceUrl: isUnknown
         ? null
-        : pref.code === "13"
-          ? toSafeHttpUrl("https://www.example.com")
-          : pref.code === "20"
-            ? toSafeHttpUrl("javascript:alert(1)")
-            : toSafeHttpUrl("https://example.com"),
+        : codeNum % 29 === 0
+          ? toSafeHttpUrl("https://example.com")
+          : null,
       updatedAt: isUnknown ? null : "2026-09-01",
     };
   });

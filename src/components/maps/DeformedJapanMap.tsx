@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { MapTooltip, pointerPosition } from "@/components/maps/MapTooltip";
-import type { JapanMapViewProps } from "@/components/maps/types";
-import { MAP_VIEWBOX, OKINAWA_BRACKET_POINTS, PREFECTURE_SHAPES } from "@/lib/map-geometry";
-import { shortPrefectureName } from "@/lib/prefectures";
-import { getPrefectureColors, getStatusConfig } from "@/lib/status-config";
+import { MapTooltip, pointerPosition } from "./MapTooltip";
+import type { JapanMapViewProps } from "./types";
+import { MAP_VIEWBOX, OKINAWA_BRACKET_POINTS, PREFECTURE_SHAPES } from "../../lib/map-geometry";
+import { shortPrefectureName } from "../../lib/prefectures";
+import { getAreaColors, getStatusConfig } from "../../lib/status-config";
 
 export function DeformedJapanMap({
   prefectures,
   selectedCode,
   onSelect,
+  mapLabel = "デフォルメ日本地図。各都道府県を選ぶと詳細を表示します",
 }: JapanMapViewProps) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(
@@ -29,7 +30,7 @@ export function DeformedJapanMap({
       <svg
         viewBox={`${MAP_VIEWBOX.minX} ${MAP_VIEWBOX.minY} ${MAP_VIEWBOX.width} ${MAP_VIEWBOX.height}`}
         role="group"
-        aria-label="デフォルメ日本地図。各都道府県を選択できます"
+        aria-label={mapLabel}
         className="h-auto w-full"
       >
         <rect
@@ -52,10 +53,10 @@ export function DeformedJapanMap({
         {PREFECTURE_SHAPES.map((shape) => {
           const record = prefectures[shape.prefCode];
           if (!record) return null;
-          const colors = getPrefectureColors(record);
+          const colors = getAreaColors(record);
           const status = getStatusConfig(record.status);
           const isSelected = selectedCode === shape.prefCode;
-          const label = shortPrefectureName(record.prefecture);
+          const label = shortPrefectureName(record.name);
           const fontSize = Math.min(
             6.4,
             shape.width / Math.max(label.length * 0.95, 2),
@@ -72,7 +73,7 @@ export function DeformedJapanMap({
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
-                aria-label={`${record.prefecture}、ステータス ${status.label}、${valueText}`}
+                aria-label={`${record.name}、ステータス ${status.label}、${valueText}`}
                 x={shape.x}
                 y={shape.y}
                 width={shape.width}

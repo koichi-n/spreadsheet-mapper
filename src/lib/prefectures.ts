@@ -1,4 +1,4 @@
-import type { PrefectureMeta } from "@/lib/types";
+import type { PrefectureMeta } from "./types";
 
 export const PREFECTURES: readonly PrefectureMeta[] = [
   { code: "01", name: "北海道" },

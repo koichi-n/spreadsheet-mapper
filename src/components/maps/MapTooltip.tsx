@@ -1,8 +1,8 @@
-import { getStatusConfig } from "@/lib/status-config";
-import type { PrefectureRecord } from "@/lib/types";
+import { getStatusConfig } from "../../lib/status-config";
+import type { AreaRecord } from "../../lib/types";
 
 type MapTooltipProps = {
-  record: PrefectureRecord | null;
+  record: AreaRecord | null;
   position: { x: number; y: number } | null;
 };
 
@@ -15,7 +15,7 @@ export function MapTooltip({ record, position }: MapTooltipProps) {
       style={{ left: position.x, top: position.y - 8 }}
       role="tooltip"
     >
-      <p className="font-semibold">{record.prefecture}</p>
+      <p className="font-semibold">{record.name}</p>
       <p className="text-slate-200">
         {getStatusConfig(record.status).label}
         {record.value !== null ? ` / ${record.value}` : ""}
@@ -24,13 +24,16 @@ export function MapTooltip({ record, position }: MapTooltipProps) {
   );
 }
 
-export function pointerPosition(event: {
-  clientX: number;
-  clientY: number;
-  currentTarget: SVGGraphicsElement;
-}): { x: number; y: number } | null {
+export function pointerPosition(
+  event: {
+    clientX: number;
+    clientY: number;
+    currentTarget: SVGGraphicsElement;
+  },
+  root?: HTMLElement | null,
+): { x: number; y: number } | null {
   const svg = event.currentTarget.ownerSVGElement;
-  const container = svg?.parentElement;
+  const container = root ?? svg?.parentElement;
   if (!svg || !container) return null;
   const containerRect = container.getBoundingClientRect();
   return {

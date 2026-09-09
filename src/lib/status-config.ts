@@ -1,4 +1,4 @@
-import type { PrefectureRecord, StatusKey } from "@/lib/types";
+import type { AreaRecord, StatusKey } from "./types";
 
 export type ColorMode = "status" | "value";
 
@@ -73,8 +73,8 @@ export function getValueFill(
   return interpolateHex(STATUS_CONFIG.C.fill, STATUS_CONFIG.A.fill, t);
 }
 
-export function getPrefectureColors(
-  record: PrefectureRecord,
+export function getAreaColors(
+  record: AreaRecord,
   valueExtent?: { min: number; max: number },
 ): { fill: string; text: string } {
   if (

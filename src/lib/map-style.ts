@@ -20,6 +20,12 @@ export const MAP_ATTRIBUTIONS: Record<
   },
 };
 
+export const MUNICIPALITY_MAP_ATTRIBUTION = {
+  label: "jpn-atlas（国土地理院 地球地図日本 2016 を加工）",
+  href: "https://github.com/biskwikman/jpn-atlas",
+  license: "BSD-3-Clause",
+} as const;
+
 export const SVG_MAP_ID_TO_PREF_CODE: Record<string, string> = {
   hokkaido: "01",
   aomori: "02",

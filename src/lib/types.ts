@@ -4,18 +4,24 @@ export type StatusKey = (typeof STATUS_KEYS)[number];
 
 export type DataSource = "mock" | "sheets";
 
-export type PrefectureRecord = {
+export type AreaLevel = "prefecture" | "municipality";
+
+export type AreaRecord = {
+  code: string;
+  level: AreaLevel;
   prefCode: string;
-  prefecture: string;
+  name: string;
   status: StatusKey;
   value: number | null;
   description: string;
   sourceUrl: string | null;
   updatedAt: string | null;
+  aggregated?: boolean;
 };
 
-export type PrefectureDataset = {
-  prefectures: Record<string, PrefectureRecord>;
+export type AreaDataset = {
+  prefectures: Record<string, AreaRecord>;
+  municipalities: Record<string, AreaRecord>;
   source: DataSource;
   fetchedAt: string;
   error: string | null;
@@ -24,5 +30,11 @@ export type PrefectureDataset = {
 
 export type PrefectureMeta = {
   code: string;
+  name: string;
+};
+
+export type MunicipalityMeta = {
+  code: string;
+  prefCode: string;
   name: string;
 };
