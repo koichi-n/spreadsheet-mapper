@@ -20,6 +20,9 @@ Googleスプレッドシートを簡易CMSとして使い、都道府県・市�
 
 - Node.js 20 以上
 - npm
+- ライブラリとして使う場合は、ホストが **Next.js（App Router）** であること
+
+特定のホスティング（Vercel など）には依存しません。Sheets API はサーバー側で呼ぶため、静的ホスト単体では動きません。
 
 ## 1. ローカルでの起動方法
 
@@ -104,40 +107,23 @@ GOOGLE_SERVICE_ACCOUNT_EMAIL=your-sa@your-project.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
-`.env.local` は Git にコミットしません。
+`.env.local` は Git にコミットしません。本番では同じ変数を、使うホスティングの環境変数として設定してください。
 
-## 6. GitHub 経由で Vercel にデプロイする
+## 6. デモアプリのデプロイ
 
-推奨は GitHub リポジトリを Vercel に接続し、`main` への push で自動デプロイする構成です。
+このリポジトリは Next.js アプリとしても起動できます。ライブラリとして他アプリに埋め込む場合は、デプロイ先はホストアプリ側の話です（[ライブラリとして使う](#ライブラリとして使う)）。
 
-### 6.1. GitHub にリポジトリを用意する
-
-まだリモートがない場合の例:
+必要なのは **Node.js 上で Next.js を動かせる環境** です。Vercel / Netlify / Cloudflare（Node 互換） / Docker / VPS など、どこでも構いません。
 
 ```bash
-git add .
-git commit -m "Initial commit"
-gh repo create spreadsheet-mapper --private --source=. --remote=origin --push
+npm install
+npm run build
+npm start
 ```
 
-### 6.2. Vercel に GitHub リポジトリをインポートする
+Framework Preset がある場合は **Next.js**、ビルドは `next build`、起動は `next start`（またはホストの Next.js 既定）です。
 
-1. [Vercel Dashboard](https://vercel.com/new) を開く
-2. 「Import Git Repository」でこのリポジトリを選ぶ（初回は GitHub 連携の許可が必要）
-3. リポジトリが一覧に出ない場合は、[GitHub の Vercel App 設定](https://github.com/settings/installations) で `spreadsheet-mapper` への Repository access を許可する
-4. Framework Preset は **Next.js** のままでよい（Build Command: `next build`）
-5. 先に環境変数を入れてから Deploy する（次項）
-
-既存の Vercel プロジェクトに後から接続する場合:
-
-```bash
-npx vercel link --yes --project spreadsheet-mapper --scope koichi-ns-projects
-npx vercel git connect https://github.com/koichi-n/spreadsheet-mapper.git --yes --scope koichi-ns-projects
-```
-
-### 6.3. Vercel 側の環境変数
-
-Project Settings → Environment Variables で、ローカルと同じ変数を設定します。
+本番の環境変数はローカルと同じです。デプロイ前に設定し、変更後は再デプロイしてください。
 
 | 変数名 | 本番の例 |
 | --- | --- |
@@ -147,29 +133,41 @@ Project Settings → Environment Variables で、ローカルと同じ変数を�
 | `GOOGLE_PRIVATE_KEY` | 実データ利用時のみ（1行 + `\n` 推奨） |
 | `GOOGLE_SHEET_RANGE` | 省略可（既定 `Sheet1!A:Z`） |
 
-注意:
-
-- `.env.local` は Git に含まれません。本番の値は必ず Vercel に設定してください
+- `.env.local` は Git に含まれません。本番の値はホスト側に設定してください
 - `GOOGLE_PRIVATE_KEY` は1行で入れ、改行を `\n` で表現するのが安全です
-- 環境変数を変更したら **Redeploy** してください
+- データはプロセス内で約5分キャッシュします。サーバーレスではインスタンスが分かれるため、効き方は環境によって異なります
 
-### 6.4. 以降の更新
+GitHub に上げる場合の例:
 
-`main` に push すると Vercel が自動で本番デプロイします。Pull Request を作ると Preview デプロイも作成されます。
+```bash
+git add .
+git commit -m "Initial commit"
+gh repo create spreadsheet-mapper --private --source=. --remote=origin --push
+```
 
-データは約5分キャッシュします。スプレッドシートを更新すると、最大で数分後にサイトへ反映されます。
+公開リポジトリにする場合は `--private` を外してください。秘密鍵はコミットしないでください。
 
-## 7. CLI でデプロイする場合（任意）
+### 例: Vercel
 
-GitHub 連携の代わりに、ローカルから直接デプロイすることもできます。
+Next.js のホストの一例です。必須ではありません。
+
+1. ホスティングのダッシュボードで Git リポジトリをインポートする
+2. Framework Preset は **Next.js**
+3. 先に環境変数を入れてからデプロイする
+
+CLI を使う場合:
 
 ```bash
 npx vercel login
+npx vercel link --yes --project your-project-name --scope your-team-slug
+npx vercel git connect https://github.com/your-org/spreadsheet-mapper.git --yes --scope your-team-slug
 npx vercel        # Preview
 npx vercel --prod # Production
 ```
 
-## 8. スプレッドシートの想定フォーマット
+`your-project-name` / `your-team-slug` / `your-org` は、自分のプロジェクト名・チーム（または個人アカウント）・GitHub の所有者名に置き換えてください。
+
+## 7. スプレッドシートの想定フォーマット
 
 1行目はヘッダーです。列順は変更しても、ヘッダー名で読み取ります。
 
@@ -217,7 +215,7 @@ npm run build:maps
 
 ## ライブラリとして使う
 
-別の Next.js アプリ（例: 団体サイト）からは、このパッケージを依存として入れ、**そのアプリの中で**地図を描画します。コアのデプロイ先へ地図を取りに行く構成ではありません。
+別の Next.js アプリ（例: 団体サイト）からは、このパッケージを依存として入れ、**そのアプリの中で**地図を描画します。コアのデプロイ先へ地図を取りに行く構成ではありません。ホストアプリは Next.js が動けばよく、デプロイ先は問いません。
 
 npm 公開前はローカルパスか GitHub で足します。
 
@@ -325,4 +323,3 @@ export async function GET(
 - React
 - Tailwind CSS
 - Google Sheets API（サーバー側のみ）
-- Vercel
