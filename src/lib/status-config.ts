@@ -35,6 +35,13 @@ export const STATUS_CONFIG: Record<
     text: "#123A70",
     legend: "C",
   },
+  D: {
+    key: "D",
+    label: "D",
+    fill: "#E0A14A",
+    text: "#3D2E0A",
+    legend: "D",
+  },
   unknown: {
     key: "unknown",
     label: "情報なし",
@@ -44,7 +51,7 @@ export const STATUS_CONFIG: Record<
   },
 };
 
-export const STATUS_ORDER: StatusKey[] = ["A", "B", "C", "unknown"];
+export const STATUS_ORDER: StatusKey[] = ["A", "B", "C", "D", "unknown"];
 
 export function getStatusConfig(status: StatusKey) {
   return STATUS_CONFIG[status] ?? STATUS_CONFIG.unknown;

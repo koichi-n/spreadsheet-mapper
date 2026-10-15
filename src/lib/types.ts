@@ -1,4 +1,4 @@
-export const STATUS_KEYS = ["A", "B", "C", "unknown"] as const;
+export const STATUS_KEYS = ["A", "B", "C", "D", "unknown"] as const;
 
 export type StatusKey = (typeof STATUS_KEYS)[number];
 

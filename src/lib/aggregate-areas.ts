@@ -1,6 +1,6 @@
 import type { AreaRecord, PrefectureMeta, StatusKey } from "./types";
 
-const STATUS_PRIORITY: StatusKey[] = ["A", "B", "C"];
+const STATUS_PRIORITY: StatusKey[] = ["A", "B", "C", "D"];
 
 export function aggregateMunicipalityRecords(
   pref: PrefectureMeta,
@@ -10,6 +10,7 @@ export function aggregateMunicipalityRecords(
     A: 0,
     B: 0,
     C: 0,
+    D: 0,
     unknown: 0,
   };
   const values: number[] = [];
@@ -34,7 +35,7 @@ export function aggregateMunicipalityRecords(
       : Math.round((values.reduce((sum, item) => sum + item, 0) / values.length) * 10) /
         10;
 
-  const knownCount = counts.A + counts.B + counts.C;
+  const knownCount = counts.A + counts.B + counts.C + counts.D;
 
   return {
     code: pref.code,

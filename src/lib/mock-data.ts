@@ -2,7 +2,7 @@ import { MUNICIPALITIES } from "./municipality-catalog";
 import { toSafeHttpUrl } from "./safe-url";
 import type { AreaRecord, StatusKey } from "./types";
 
-const STATUS_CYCLE: StatusKey[] = ["A", "B", "C"];
+const STATUS_CYCLE: StatusKey[] = ["A", "B", "C", "D"];
 
 export function getMockAreaRecords(): AreaRecord[] {
   return MUNICIPALITIES.map((muni) => {
@@ -10,7 +10,7 @@ export function getMockAreaRecords(): AreaRecord[] {
     const isUnknown = codeNum % 17 === 0;
     const status: StatusKey = isUnknown
       ? "unknown"
-      : STATUS_CYCLE[codeNum % 3];
+      : STATUS_CYCLE[codeNum % 4];
 
     return {
       code: muni.code,

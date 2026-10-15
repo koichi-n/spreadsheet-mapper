@@ -63,7 +63,12 @@ function cell(row: string[], index: number | undefined): string {
 
 function parseStatus(raw: string): StatusKey {
   const normalized = raw.trim().toUpperCase();
-  if (normalized === "A" || normalized === "B" || normalized === "C") {
+  if (
+    normalized === "A" ||
+    normalized === "B" ||
+    normalized === "C" ||
+    normalized === "D"
+  ) {
     return normalized;
   }
   return "unknown";
