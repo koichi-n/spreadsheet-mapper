@@ -20,5 +20,6 @@ export type {
   AreaLevel,
   AreaRecord,
   DataSource,
+  LegendItem,
   StatusKey,
 } from "./lib/types";

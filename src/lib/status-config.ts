@@ -53,6 +53,13 @@ export const STATUS_CONFIG: Record<
 
 export const STATUS_ORDER: StatusKey[] = ["A", "B", "C", "D", "unknown"];
 
+export function defaultLegendItems(): { status: StatusKey; label: string }[] {
+  return STATUS_ORDER.map((status) => ({
+    status,
+    label: STATUS_CONFIG[status].legend,
+  }));
+}
+
 export function getStatusConfig(status: StatusKey) {
   return STATUS_CONFIG[status] ?? STATUS_CONFIG.unknown;
 }

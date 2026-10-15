@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import { getStatusConfig } from "../lib/status-config";
-import type { AreaRecord } from "../lib/types";
+import type { AreaRecord, StatusKey } from "../lib/types";
 
 type AreaDetailProps = {
   record: AreaRecord | null | undefined;
   emptyText: string;
   heading: string;
   action?: ReactNode;
+  legendLabels?: Partial<Record<StatusKey, string>>;
 };
 
 export function AreaDetail({
@@ -14,6 +15,7 @@ export function AreaDetail({
   emptyText,
   heading,
   action,
+  legendLabels,
 }: AreaDetailProps) {
   return (
     <section
@@ -45,7 +47,7 @@ export function AreaDetail({
           ) : null}
           <dl className="mt-4 grid gap-3 text-sm">
             <DetailItem label="ステータス">
-              <StatusBadge record={record} />
+              <StatusBadge record={record} legendLabels={legendLabels} />
             </DetailItem>
             <DetailItem label="数値">
               {record.value === null ? "—" : record.value.toLocaleString("ja-JP")}
@@ -93,7 +95,13 @@ function DetailItem({
   );
 }
 
-function StatusBadge({ record }: { record: AreaRecord }) {
+function StatusBadge({
+  record,
+  legendLabels,
+}: {
+  record: AreaRecord;
+  legendLabels?: Partial<Record<StatusKey, string>>;
+}) {
   const status = getStatusConfig(record.status);
   return (
     <span className="inline-flex items-center gap-2">
@@ -102,7 +110,7 @@ function StatusBadge({ record }: { record: AreaRecord }) {
         style={{ backgroundColor: status.fill }}
         aria-hidden="true"
       />
-      <span>{status.label}</span>
+      <span>{legendLabels?.[record.status] ?? status.label}</span>
     </span>
   );
 }

@@ -20,6 +20,7 @@ export default async function Page() {
       fetchedAt={data.fetchedAt}
       error={data.error}
       warnings={data.warnings}
+      legend={data.legend}
     />
   );
 }

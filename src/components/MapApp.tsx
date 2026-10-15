@@ -18,7 +18,13 @@ import {
   type MapStyle,
 } from "../lib/map-style";
 import { PREFECTURES } from "../lib/prefectures";
-import type { AreaLevel, AreaRecord, DataSource } from "../lib/types";
+import { defaultLegendItems } from "../lib/status-config";
+import type {
+  AreaLevel,
+  AreaRecord,
+  DataSource,
+  LegendItem,
+} from "../lib/types";
 
 export type MapAppProps = {
   prefectures: Record<string, AreaRecord>;
@@ -40,6 +46,8 @@ export type MapAppProps = {
   /** クライアントから直接渡す場合の上書き */
   loadMunicipalities?: (prefCode: string) => Promise<AreaRecord[]>;
   municipalityMapBasePath?: string;
+  /** 凡例。省略時は A / B / C / D / 情報なし */
+  legend?: LegendItem[];
 };
 
 const GRANULARITY_OPTIONS = [
@@ -60,7 +68,12 @@ export function MapApp({
   municipalitiesPathTemplate = "/api/municipalities/{prefCode}",
   loadMunicipalities,
   municipalityMapBasePath = DEFAULT_MUNICIPALITY_MAP_BASE_PATH,
+  legend,
 }: MapAppProps) {
+  const legendItems = legend && legend.length > 0 ? legend : defaultLegendItems();
+  const legendLabels = Object.fromEntries(
+    legendItems.map((item) => [item.status, item.label]),
+  ) as Partial<Record<AreaRecord["status"], string>>;
   const [granularity, setGranularity] = useState<AreaLevel>("prefecture");
   const [selectedPrefCode, setSelectedPrefCode] = useState<string | null>(null);
   const [selectedMuniCode, setSelectedMuniCode] = useState<string | null>(null);
@@ -269,6 +282,8 @@ export function MapApp({
           </div>
         ) : null}
 
+        <MapLegend className="mb-4" items={legendItems} />
+
         {granularity === "municipality" && selectedPrefCode ? (
           <MunicipalityMap
             key={selectedPrefCode}
@@ -307,11 +322,10 @@ export function MapApp({
         ) : null}
       </section>
 
-      <MapLegend className="mt-6" />
-
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(16rem,0.8fr)]">
         <AreaDetail
           record={selected}
+          legendLabels={legendLabels}
           heading={
             selected?.level === "municipality"
               ? "選択した市区町村の詳細"

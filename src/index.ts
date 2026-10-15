@@ -3,6 +3,7 @@ export type {
   AreaLevel,
   AreaRecord,
   DataSource,
+  LegendItem,
   MunicipalityMeta,
   PrefectureMeta,
   StatusKey,

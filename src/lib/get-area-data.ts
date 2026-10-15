@@ -6,10 +6,12 @@ import {
 } from "./area-data-options";
 import { MUNICIPALITIES, municipalitiesInPref } from "./municipality-catalog";
 import { getMockAreaRecords } from "./mock-data";
+import { parseLegendRows } from "./parse-legend";
 import { parseSheetRows } from "./parse-sheet";
 import { PREFECTURES } from "./prefectures";
 import { fetchSheetRows } from "./sheets";
-import type { AreaDataset, AreaRecord } from "./types";
+import { defaultLegendItems } from "./status-config";
+import type { AreaDataset, AreaRecord, LegendItem } from "./types";
 
 type CacheEntry = {
   expiresAt: number;
@@ -50,9 +52,25 @@ function emptyMunicipality(
   };
 }
 
+const LEGEND_SHEET_RANGE = "凡例!A:Z";
+
+async function loadLegend(options: AreaDataOptions): Promise<LegendItem[]> {
+  try {
+    const rows = await fetchSheetRows({
+      ...options,
+      sheetRange: LEGEND_SHEET_RANGE,
+    });
+    const parsed = parseLegendRows(rows);
+    if (parsed.length > 0) return parsed;
+  } catch {
+    // 凡例シートがなくても地図データは出す
+  }
+  return defaultLegendItems();
+}
+
 function buildDataset(
   records: AreaRecord[],
-  meta: Pick<AreaDataset, "source" | "error" | "warnings">,
+  meta: Pick<AreaDataset, "source" | "error" | "warnings" | "legend">,
 ): AreaDataset {
   const prefRows = new Map<string, AreaRecord>();
   const muniRows = new Map<string, AreaRecord>();
@@ -117,6 +135,7 @@ function buildDataset(
     fetchedAt: new Date().toISOString(),
     error: meta.error,
     warnings,
+    legend: meta.legend,
   };
 }
 
@@ -135,22 +154,28 @@ async function loadAreaData(options: AreaDataOptions): Promise<AreaDataset> {
       source: "mock",
       error: null,
       warnings: ["モックデータを表示しています。"],
+      legend: defaultLegendItems(),
     });
   }
 
   try {
-    const rows = await fetchSheetRows(options);
+    const [rows, legend] = await Promise.all([
+      fetchSheetRows(options),
+      loadLegend(options),
+    ]);
     const parsed = parseSheetRows(rows);
     return buildDataset(parsed.records, {
       source: "sheets",
       error: null,
       warnings: parsed.warnings,
+      legend,
     });
   } catch (error) {
     return buildDataset([], {
       source: "sheets",
       error: toUserError(error),
       warnings: [],
+      legend: defaultLegendItems(),
     });
   }
 }

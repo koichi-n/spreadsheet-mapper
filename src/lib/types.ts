@@ -19,6 +19,11 @@ export type AreaRecord = {
   aggregated?: boolean;
 };
 
+export type LegendItem = {
+  status: StatusKey;
+  label: string;
+};
+
 export type AreaDataset = {
   prefectures: Record<string, AreaRecord>;
   municipalities: Record<string, AreaRecord>;
@@ -26,6 +31,7 @@ export type AreaDataset = {
   fetchedAt: string;
   error: string | null;
   warnings: string[];
+  legend: LegendItem[];
 };
 
 export type PrefectureMeta = {
