@@ -352,7 +352,7 @@ export function MapApp({
         ) : null}
       </section>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(16rem,0.8fr)]">
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,1.2fr)]">
         <AreaDetail
           record={selected}
           legendLabels={legendLabels}
@@ -401,6 +401,7 @@ export function MapApp({
           }
           searchable={listIsMunicipalities}
           palette={palette}
+          legendLabels={legendLabels}
         />
       </div>
 

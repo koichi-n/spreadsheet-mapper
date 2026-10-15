@@ -1,12 +1,18 @@
 import { getStatusConfig } from "../../lib/status-config";
 import type { AreaRecord } from "../../lib/types";
+import type { MapTooltipMode } from "./types";
 
 type MapTooltipProps = {
   record: AreaRecord | null;
   position: { x: number; y: number } | null;
+  mode?: MapTooltipMode;
 };
 
-export function MapTooltip({ record, position }: MapTooltipProps) {
+export function MapTooltip({
+  record,
+  position,
+  mode = "full",
+}: MapTooltipProps) {
   if (!record || !position) return null;
 
   return (
@@ -16,10 +22,12 @@ export function MapTooltip({ record, position }: MapTooltipProps) {
       role="tooltip"
     >
       <p className="font-semibold">{record.name}</p>
-      <p className="text-slate-200">
-        {getStatusConfig(record.status).label}
-        {record.value !== null ? ` / ${record.value}` : ""}
-      </p>
+      {mode === "full" ? (
+        <p className="text-slate-200">
+          {getStatusConfig(record.status).label}
+          {record.value !== null ? ` / ${record.value}` : ""}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -1,8 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getStatusConfig, paintForStatus, type StatusPalette } from "../lib/status-config";
-import type { AreaRecord } from "../lib/types";
+import {
+  getStatusConfig,
+  paintForStatus,
+  type StatusPalette,
+} from "../lib/status-config";
+import type { AreaRecord, StatusKey } from "../lib/types";
 
 type AreaListProps = {
   records: AreaRecord[];
@@ -12,6 +16,7 @@ type AreaListProps = {
   description: string;
   searchable?: boolean;
   palette?: StatusPalette;
+  legendLabels?: Partial<Record<StatusKey, string>>;
 };
 
 export function AreaList({
@@ -22,6 +27,7 @@ export function AreaList({
   description,
   searchable = false,
   palette,
+  legendLabels,
 }: AreaListProps) {
   const [query, setQuery] = useState("");
 
@@ -70,21 +76,23 @@ export function AreaList({
                 type="button"
                 onClick={() => onSelect(record.code)}
                 aria-current={selected ? "true" : undefined}
-                className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
+                className={`flex w-full items-start justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition ${
                   selected
                     ? "bg-slate-900 text-white"
                     : "text-slate-800 hover:bg-slate-100"
                 }`}
               >
-                <span className="font-medium">{record.name}</span>
-                <span className="inline-flex shrink-0 items-center gap-2">
+                <span className="shrink-0 font-medium">{record.name}</span>
+                <span className="inline-flex min-w-0 items-start gap-2 text-right">
                   <span
-                    className="inline-block size-2.5 rounded-sm ring-1 ring-black/10"
+                    className="mt-1.5 inline-block size-2.5 shrink-0 rounded-sm ring-1 ring-black/10"
                     style={{ backgroundColor: paint.fill }}
                     aria-hidden="true"
                   />
-                  <span className={selected ? "text-slate-200" : "text-slate-500"}>
-                    {status.label}
+                  <span
+                    className={`leading-snug ${selected ? "text-slate-200" : "text-slate-500"}`}
+                  >
+                    {legendLabels?.[record.status] ?? status.label}
                   </span>
                 </span>
               </button>

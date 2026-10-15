@@ -17,6 +17,7 @@ export function DeformedJapanMap({
   onSelect,
   mapLabel = "デフォルメ日本地図。各都道府県を選ぶと詳細を表示します",
   palette,
+  tooltipMode = "full",
 }: JapanMapViewProps) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(
@@ -69,6 +70,10 @@ export function DeformedJapanMap({
           );
           const valueText =
             record.value === null ? "数値なし" : `数値 ${record.value}`;
+          const ariaLabel =
+            tooltipMode === "name"
+              ? record.name
+              : `${record.name}、ステータス ${status.label}、${valueText}`;
 
           return (
             <g key={shape.prefCode}>
@@ -78,7 +83,7 @@ export function DeformedJapanMap({
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
-                aria-label={`${record.name}、ステータス ${status.label}、${valueText}`}
+                aria-label={ariaLabel}
                 x={shape.x}
                 y={shape.y}
                 width={shape.width}
@@ -123,7 +128,11 @@ export function DeformedJapanMap({
           );
         })}
       </svg>
-      <MapTooltip record={hovered ?? null} position={tooltip} />
+      <MapTooltip
+        record={hovered ?? null}
+        position={tooltip}
+        mode={tooltipMode}
+      />
     </div>
   );
 }

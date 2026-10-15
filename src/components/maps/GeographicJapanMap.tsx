@@ -29,6 +29,7 @@ export function GeographicJapanMap({
   onSelect,
   mapLabel = "日本地図。各都道府県を選ぶと詳細を表示します",
   palette,
+  tooltipMode = "full",
 }: JapanMapViewProps) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(
@@ -67,6 +68,10 @@ export function GeographicJapanMap({
           const isSelected = selectedCode === location.prefCode;
           const valueText =
             record.value === null ? "数値なし" : `数値 ${record.value}`;
+          const ariaLabel =
+            tooltipMode === "name"
+              ? record.name
+              : `${record.name}、ステータス ${status.label}、${valueText}`;
 
           return (
             <path
@@ -76,7 +81,7 @@ export function GeographicJapanMap({
               role="button"
               tabIndex={0}
               aria-pressed={isSelected}
-              aria-label={`${record.name}、ステータス ${status.label}、${valueText}`}
+              aria-label={ariaLabel}
               d={location.path}
               fill={colors.fill}
               stroke={mapStroke(colors.fill, isSelected)}
@@ -104,7 +109,11 @@ export function GeographicJapanMap({
           );
         })}
       </svg>
-      <MapTooltip record={hovered ?? null} position={tooltip} />
+      <MapTooltip
+        record={hovered ?? null}
+        position={tooltip}
+        mode={tooltipMode}
+      />
     </div>
   );
 }
