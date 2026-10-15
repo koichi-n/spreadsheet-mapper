@@ -19,7 +19,6 @@ import {
 } from "../lib/map-style";
 import { PREFECTURES } from "../lib/prefectures";
 import type {
-  AreaDataset,
   AreaLevel,
   AreaRecord,
   DataSource,
@@ -49,26 +48,6 @@ export type MapAppProps = {
   loadMunicipalities?: (prefCode: string) => Promise<AreaRecord[]>;
   municipalityMapBasePath?: string;
 };
-
-/** getAreaData の結果を MapApp に渡す。凡例もここに含む */
-export function toMapAppProps(
-  data: Pick<
-    AreaDataset,
-    "prefectures" | "source" | "fetchedAt" | "error" | "warnings" | "legend"
-  >,
-): Pick<
-  MapAppProps,
-  "prefectures" | "source" | "fetchedAt" | "error" | "warnings" | "legend"
-> {
-  return {
-    prefectures: data.prefectures,
-    source: data.source,
-    fetchedAt: data.fetchedAt,
-    error: data.error,
-    warnings: data.warnings,
-    legend: data.legend,
-  };
-}
 
 const GRANULARITY_OPTIONS = [
   { value: "prefecture", label: "都道府県" },

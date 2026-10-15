@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { APP_CONFIG } from "@/lib/app-config";
-import { MapApp, toMapAppProps } from "@/client";
-import { getAreaData } from "@/server";
+import { MapApp } from "@/client";
+import { getAreaData, toMapAppProps } from "@/server";
 
 export const runtime = "nodejs";
 export const revalidate = 300;

@@ -261,8 +261,8 @@ npx spreadsheet-mapper-copy-maps public/municipality-maps
 
 ```tsx
 // app/maps/[slug]/page.tsx （Server Component）
-import { getAreaData } from "spreadsheet-mapper/server";
-import { MapApp, toMapAppProps } from "spreadsheet-mapper/client";
+import { getAreaData, toMapAppProps } from "spreadsheet-mapper/server";
+import { MapApp } from "spreadsheet-mapper/client";
 
 export default async function Page() {
   const sheet = {

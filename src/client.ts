@@ -1,4 +1,4 @@
-export { MapApp, toMapAppProps } from "./components/MapApp";
+export { MapApp } from "./components/MapApp";
 export type { MapAppProps } from "./components/MapApp";
 export {
   DEFAULT_MUNICIPALITY_MAP_BASE_PATH,

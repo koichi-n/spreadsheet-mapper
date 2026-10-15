@@ -12,6 +12,8 @@ export { STATUS_KEYS } from "./lib/types";
 
 export type { AreaDataOptions } from "./lib/area-data-options";
 export { getAreaData, getMunicipalitiesForPref } from "./lib/get-area-data";
+export { toMapAppProps } from "./lib/to-map-app-props";
+export type { MapDataProps } from "./lib/to-map-app-props";
 export { parseSheetRows } from "./lib/parse-sheet";
 export {
   PREFECTURES,
