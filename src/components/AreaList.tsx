@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getStatusConfig } from "../lib/status-config";
+import { getStatusConfig, paintForStatus, type StatusPalette } from "../lib/status-config";
 import type { AreaRecord } from "../lib/types";
 
 type AreaListProps = {
@@ -11,6 +11,7 @@ type AreaListProps = {
   heading: string;
   description: string;
   searchable?: boolean;
+  palette?: StatusPalette;
 };
 
 export function AreaList({
@@ -20,6 +21,7 @@ export function AreaList({
   heading,
   description,
   searchable = false,
+  palette,
 }: AreaListProps) {
   const [query, setQuery] = useState("");
 
@@ -60,6 +62,7 @@ export function AreaList({
       <ul className="mt-4 max-h-[28rem] space-y-1 overflow-y-auto pr-1">
         {visible.map((record) => {
           const status = getStatusConfig(record.status);
+          const paint = paintForStatus(record.status, palette);
           const selected = selectedCode === record.code;
           return (
             <li key={record.code}>
@@ -77,7 +80,7 @@ export function AreaList({
                 <span className="inline-flex shrink-0 items-center gap-2">
                   <span
                     className="inline-block size-2.5 rounded-sm ring-1 ring-black/10"
-                    style={{ backgroundColor: status.fill }}
+                    style={{ backgroundColor: paint.fill }}
                     aria-hidden="true"
                   />
                   <span className={selected ? "text-slate-200" : "text-slate-500"}>

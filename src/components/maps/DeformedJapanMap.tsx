@@ -5,13 +5,18 @@ import { MapTooltip, pointerPosition } from "./MapTooltip";
 import type { JapanMapViewProps } from "./types";
 import { MAP_VIEWBOX, OKINAWA_BRACKET_POINTS, PREFECTURE_SHAPES } from "../../lib/map-geometry";
 import { shortPrefectureName } from "../../lib/prefectures";
-import { getAreaColors, getStatusConfig } from "../../lib/status-config";
+import {
+  getAreaColors,
+  getStatusConfig,
+  mapStroke,
+} from "../../lib/status-config";
 
 export function DeformedJapanMap({
   prefectures,
   selectedCode,
   onSelect,
   mapLabel = "デフォルメ日本地図。各都道府県を選ぶと詳細を表示します",
+  palette,
 }: JapanMapViewProps) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(
@@ -53,7 +58,7 @@ export function DeformedJapanMap({
         {PREFECTURE_SHAPES.map((shape) => {
           const record = prefectures[shape.prefCode];
           if (!record) return null;
-          const colors = getAreaColors(record);
+          const colors = getAreaColors(record, undefined, palette);
           const status = getStatusConfig(record.status);
           const isSelected = selectedCode === shape.prefCode;
           const label = shortPrefectureName(record.name);
@@ -80,7 +85,7 @@ export function DeformedJapanMap({
                 height={shape.height}
                 rx={Math.min(3.2, shape.width * 0.16, shape.height * 0.16)}
                 fill={colors.fill}
-                stroke={isSelected ? "#0F172A" : "#FFFFFF"}
+                stroke={mapStroke(colors.fill, isSelected)}
                 strokeWidth={isSelected ? 2.2 : 0.8}
                 onClick={() => onSelect(shape.prefCode)}
                 onKeyDown={(event) => {

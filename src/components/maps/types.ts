@@ -1,3 +1,4 @@
+import type { StatusPalette } from "../../lib/status-config";
 import type { AreaRecord } from "../../lib/types";
 
 export type JapanMapViewProps = {
@@ -5,4 +6,5 @@ export type JapanMapViewProps = {
   selectedCode: string | null;
   onSelect: (code: string) => void;
   mapLabel?: string;
+  palette?: StatusPalette;
 };

@@ -278,13 +278,19 @@ export default async function Page() {
     <MapApp
       {...toMapAppProps(data)}
       showHeader={false}
-      municipalitiesPathTemplate="/api/maps/your-slug/municipalities/{prefCode}"
+      // 都道府県のみ表示する場合
+      enableMunicipalities={false}
+      // 市区町村も使う場合は enableMunicipalities を省略（または true）し、
+      // municipalitiesPathTemplate を渡す
+      // municipalitiesPathTemplate="/api/maps/your-slug/municipalities/{prefCode}"
     />
   );
 }
 ```
 
-市区町村の Route Handler では、同じシート設定で `getMunicipalitiesForPref` を呼びます。データセットが複数あるときは、シートごとに options を変えます。
+`enableMunicipalities={false}` のときは、表示単位の切替と「市区町村を見る」導線を出しません。市区町村境界 JSON のコピーも不要です。
+
+市区町村を使うときの Route Handler では、同じシート設定で `getMunicipalitiesForPref` を呼びます。データセットが複数あるときは、シートごとに options を変えます。
 
 ```ts
 import { getMunicipalitiesForPref, isPrefCode } from "spreadsheet-mapper/server";
@@ -309,7 +315,13 @@ export async function GET(
 
 ## 色の変更
 
-色とラベルは `src/lib/status-config.ts` の `STATUS_CONFIG` にまとめています。
+地図の塗りは、各スプレッドシートの **凡例シートの並び** から `paletteFromLegend`（`src/lib/status-config.ts`）が決めます。地図ごとに項目数が違っても、同じ規則です。
+
+- 情報なし: 白
+- 情報がある項目の最後（政策の実施が見られないもの）: 薄いグレー
+- それ以外（何らかの政策あり）: 青の濃淡。凡例の先頭が最も濃い
+
+固定の A / B / C / D 色は `STATUS_CONFIG` のフォールバックです。
 
 将来、`value` によるグラデーション表示へ切り替える場合は、同じファイルの `MAP_COLOR_MODE` を `'value'` に変更できます。MVPでは `status` による色分けを使います。
 

@@ -5,7 +5,11 @@ import japanMap from "@svg-maps/japan";
 import { MapTooltip, pointerPosition } from "./MapTooltip";
 import type { JapanMapViewProps } from "./types";
 import { SVG_MAP_ID_TO_PREF_CODE } from "../../lib/map-style";
-import { getAreaColors, getStatusConfig } from "../../lib/status-config";
+import {
+  getAreaColors,
+  getStatusConfig,
+  mapStroke,
+} from "../../lib/status-config";
 
 const GEO_LOCATIONS = japanMap.locations.flatMap((location) => {
   const prefCode = SVG_MAP_ID_TO_PREF_CODE[location.id];
@@ -24,6 +28,7 @@ export function GeographicJapanMap({
   selectedCode,
   onSelect,
   mapLabel = "日本地図。各都道府県を選ぶと詳細を表示します",
+  palette,
 }: JapanMapViewProps) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(
@@ -57,7 +62,7 @@ export function GeographicJapanMap({
         {GEO_LOCATIONS.map((location) => {
           const record = prefectures[location.prefCode];
           if (!record) return null;
-          const colors = getAreaColors(record);
+          const colors = getAreaColors(record, undefined, palette);
           const status = getStatusConfig(record.status);
           const isSelected = selectedCode === location.prefCode;
           const valueText =
@@ -74,7 +79,7 @@ export function GeographicJapanMap({
               aria-label={`${record.name}、ステータス ${status.label}、${valueText}`}
               d={location.path}
               fill={colors.fill}
-              stroke={isSelected ? "#0F172A" : "#FFFFFF"}
+              stroke={mapStroke(colors.fill, isSelected)}
               strokeWidth={isSelected ? 1.4 : 0.45}
               strokeLinejoin="round"
               onClick={() => onSelect(location.prefCode)}

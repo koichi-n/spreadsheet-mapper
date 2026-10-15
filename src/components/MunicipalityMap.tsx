@@ -8,7 +8,13 @@ import {
   type MunicipalityMapData,
   type MunicipalityMapLocation,
 } from "../lib/load-municipality-map";
-import { getAreaColors, getStatusConfig } from "../lib/status-config";
+import {
+  getAreaColors,
+  getStatusConfig,
+  mapStroke,
+  paintForStatus,
+  type StatusPalette,
+} from "../lib/status-config";
 import type { AreaRecord } from "../lib/types";
 
 type MunicipalityMapProps = {
@@ -18,6 +24,7 @@ type MunicipalityMapProps = {
   selectedCode: string | null;
   onSelect: (code: string) => void;
   mapBasePath?: string;
+  palette?: StatusPalette;
 };
 
 export function MunicipalityMap({
@@ -27,6 +34,7 @@ export function MunicipalityMap({
   selectedCode,
   onSelect,
   mapBasePath,
+  palette,
 }: MunicipalityMapProps) {
   const [map, setMap] = useState<MunicipalityMapData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +100,7 @@ export function MunicipalityMap({
         selectedCode={selectedCode}
         label={`${prefName}の市区町村地図。各市区町村を選択できます`}
         rootRef={rootRef}
+        palette={palette}
         onSelect={onSelect}
         onHover={(code, position) => {
           setHoveredCode(code);
@@ -111,6 +120,7 @@ export function MunicipalityMap({
             label={`${prefName}の離島`}
             compact
             rootRef={rootRef}
+            palette={palette}
             onSelect={onSelect}
             onHover={(code, position) => {
               setHoveredCode(code);
@@ -132,6 +142,7 @@ function MunicipalitySvg({
   label,
   compact = false,
   rootRef,
+  palette,
   onSelect,
   onHover,
 }: {
@@ -142,6 +153,7 @@ function MunicipalitySvg({
   label: string;
   compact?: boolean;
   rootRef: { current: HTMLDivElement | null };
+  palette?: StatusPalette;
   onSelect: (code: string) => void;
   onHover: (code: string | null, position: { x: number; y: number } | null) => void;
 }) {
@@ -157,8 +169,8 @@ function MunicipalitySvg({
         const name = record?.name || location.name;
         const status = getStatusConfig(record?.status ?? "unknown");
         const colors = record
-          ? getAreaColors(record)
-          : { fill: status.fill, text: status.text };
+          ? getAreaColors(record, undefined, palette)
+          : paintForStatus("unknown", palette);
         const isSelected = selectedCode === location.code;
         const valueText =
           record?.value == null ? "数値なし" : `数値 ${record.value}`;
@@ -174,7 +186,7 @@ function MunicipalitySvg({
             aria-label={`${name}、ステータス ${status.label}、${valueText}`}
             d={location.path}
             fill={colors.fill}
-            stroke={isSelected ? "#0F172A" : "#FFFFFF"}
+            stroke={mapStroke(colors.fill, isSelected)}
             strokeWidth={strokeForViewBox(viewBox, isSelected)}
             strokeLinejoin="round"
             onClick={() => onSelect(location.code)}

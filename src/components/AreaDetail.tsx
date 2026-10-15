@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { getStatusConfig } from "../lib/status-config";
+import { getStatusConfig, paintForStatus, type StatusPalette } from "../lib/status-config";
 import type { AreaRecord, StatusKey } from "../lib/types";
 
 type AreaDetailProps = {
@@ -8,6 +8,9 @@ type AreaDetailProps = {
   heading: string;
   action?: ReactNode;
   legendLabels?: Partial<Record<StatusKey, string>>;
+  palette?: StatusPalette;
+  /** false のとき、市区町村への絞り込みを促す文言を出さない */
+  enableMunicipalities?: boolean;
 };
 
 export function AreaDetail({
@@ -16,6 +19,8 @@ export function AreaDetail({
   heading,
   action,
   legendLabels,
+  palette,
+  enableMunicipalities = true,
 }: AreaDetailProps) {
   return (
     <section
@@ -42,12 +47,18 @@ export function AreaDetail({
             </p>
           ) : record.aggregated ? (
             <p className="mt-1 text-xs text-slate-500">
-              市区町村データの集計です。地図または一覧から市区町村を選ぶと、個別の状況を表示します。
+              {enableMunicipalities
+                ? "市区町村データの集計です。地図または一覧から市区町村を選ぶと、個別の状況を表示します。"
+                : "市区町村データの集計です。"}
             </p>
           ) : null}
           <dl className="mt-4 grid gap-3 text-sm">
             <DetailItem label="ステータス">
-              <StatusBadge record={record} legendLabels={legendLabels} />
+              <StatusBadge
+                record={record}
+                legendLabels={legendLabels}
+                palette={palette}
+              />
             </DetailItem>
             <DetailItem label="数値">
               {record.value === null ? "—" : record.value.toLocaleString("ja-JP")}
@@ -98,16 +109,19 @@ function DetailItem({
 function StatusBadge({
   record,
   legendLabels,
+  palette,
 }: {
   record: AreaRecord;
   legendLabels?: Partial<Record<StatusKey, string>>;
+  palette?: StatusPalette;
 }) {
   const status = getStatusConfig(record.status);
+  const paint = paintForStatus(record.status, palette);
   return (
     <span className="inline-flex items-center gap-2">
       <span
         className="inline-block size-3 rounded-sm ring-1 ring-black/10"
-        style={{ backgroundColor: status.fill }}
+        style={{ backgroundColor: paint.fill }}
         aria-hidden="true"
       />
       <span>{legendLabels?.[record.status] ?? status.label}</span>

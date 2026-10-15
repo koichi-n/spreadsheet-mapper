@@ -18,6 +18,7 @@ import {
   type MapStyle,
 } from "../lib/map-style";
 import { PREFECTURES } from "../lib/prefectures";
+import { paletteFromLegend } from "../lib/status-config";
 import type {
   AreaLevel,
   AreaRecord,
@@ -47,6 +48,11 @@ export type MapAppProps = {
   /** クライアントから直接渡す場合の上書き */
   loadMunicipalities?: (prefCode: string) => Promise<AreaRecord[]>;
   municipalityMapBasePath?: string;
+  /**
+   * false のとき市区町村表示を出さない（表示単位切替・市区町村への導線を隠す）。
+   * 都道府県データのみの埋め込み向け。既定は true。
+   */
+  enableMunicipalities?: boolean;
 };
 
 const GRANULARITY_OPTIONS = [
@@ -67,12 +73,17 @@ export function MapApp({
   municipalitiesPathTemplate = "/api/municipalities/{prefCode}",
   loadMunicipalities,
   municipalityMapBasePath = DEFAULT_MUNICIPALITY_MAP_BASE_PATH,
+  enableMunicipalities = true,
   legend,
 }: MapAppProps) {
   const legendItems = legend;
   const legendLabels = Object.fromEntries(
     legendItems.map((item) => [item.status, item.label]),
   ) as Partial<Record<AreaRecord["status"], string>>;
+  const palette = useMemo(
+    () => paletteFromLegend(legendItems),
+    [legendItems],
+  );
   const [granularity, setGranularity] = useState<AreaLevel>("prefecture");
   const [selectedPrefCode, setSelectedPrefCode] = useState<string | null>(null);
   const [selectedMuniCode, setSelectedMuniCode] = useState<string | null>(null);
@@ -84,8 +95,14 @@ export function MapApp({
   const municipalitiesPathTemplateRef = useRef(municipalitiesPathTemplate);
   municipalitiesPathTemplateRef.current = municipalitiesPathTemplate;
 
+  const activeGranularity: AreaLevel = enableMunicipalities
+    ? granularity
+    : "prefecture";
+
   const showMunicipalityMap =
-    granularity === "municipality" && selectedPrefCode !== null;
+    enableMunicipalities &&
+    activeGranularity === "municipality" &&
+    selectedPrefCode !== null;
 
   const prefRecords = useMemo(
     () =>
@@ -114,7 +131,13 @@ export function MapApp({
     : activePref;
 
   useEffect(() => {
-    if (!selectedPrefCode || granularity !== "municipality") return;
+    if (
+      !enableMunicipalities ||
+      !selectedPrefCode ||
+      activeGranularity !== "municipality"
+    ) {
+      return;
+    }
 
     let cancelled = false;
     const load =
@@ -139,7 +162,7 @@ export function MapApp({
     return () => {
       cancelled = true;
     };
-  }, [selectedPrefCode, granularity]);
+  }, [selectedPrefCode, activeGranularity, enableMunicipalities]);
 
   useEffect(() => {
     if (!showMunicipalityMap) return;
@@ -162,6 +185,7 @@ export function MapApp({
   }
 
   function changeGranularity(next: AreaLevel) {
+    if (!enableMunicipalities) return;
     setGranularity(next);
     if (next === "prefecture") {
       setSelectedMuniCode(null);
@@ -171,12 +195,13 @@ export function MapApp({
   function selectPrefecture(code: string) {
     setSelectedPrefCode(code);
     setSelectedMuniCode(null);
-    if (granularity === "prefecture") {
+    if (activeGranularity === "prefecture") {
       scrollDetailIntoView();
     }
   }
 
   function openMunicipalities(code: string) {
+    if (!enableMunicipalities) return;
     setSelectedPrefCode(code);
     setSelectedMuniCode(null);
     setGranularity("municipality");
@@ -193,11 +218,11 @@ export function MapApp({
 
   const listIsMunicipalities = showMunicipalityMap;
   const japanMapHint =
-    granularity === "municipality"
+    activeGranularity === "municipality"
       ? "市区町村を見る都道府県を選んでください。"
       : "都道府県を選ぶと、その詳細を表示します。";
   const japanMapLabel =
-    granularity === "municipality"
+    activeGranularity === "municipality"
       ? "日本地図。市区町村を見る都道府県を選べます"
       : "日本地図。各都道府県を選ぶと詳細を表示します";
 
@@ -227,7 +252,7 @@ export function MapApp({
       <DataBanner
         error={error}
         warnings={warnings}
-        extra={granularity === "municipality" ? muniError : null}
+        extra={activeGranularity === "municipality" ? muniError : null}
       />
 
       <a
@@ -241,28 +266,32 @@ export function MapApp({
         aria-label={showMunicipalityMap ? "市区町村地図" : "日本地図"}
         className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-5"
       >
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium tracking-wide text-slate-500">
-              表示単位
-            </p>
-            <p className="mt-0.5 text-sm text-slate-600">
-              {granularity === "prefecture"
-                ? "全国を都道府県で比較します。"
-                : showMunicipalityMap
-                  ? `${activePref?.name ?? ""}の市区町村に絞り込んでいます。`
-                  : "市区町村を見る都道府県を選んでください。"}
-            </p>
+        {enableMunicipalities ? (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium tracking-wide text-slate-500">
+                表示単位
+              </p>
+              <p className="mt-0.5 text-sm text-slate-600">
+                {activeGranularity === "prefecture"
+                  ? "全国を都道府県で比較します。"
+                  : showMunicipalityMap
+                    ? `${activePref?.name ?? ""}の市区町村に絞り込んでいます。`
+                    : "市区町村を見る都道府県を選んでください。"}
+              </p>
+            </div>
+            <SegmentedControl
+              value={activeGranularity}
+              onChange={changeGranularity}
+              ariaLabel="表示単位"
+              options={GRANULARITY_OPTIONS}
+            />
           </div>
-          <SegmentedControl
-            value={granularity}
-            onChange={changeGranularity}
-            ariaLabel="表示単位"
-            options={GRANULARITY_OPTIONS}
-          />
-        </div>
+        ) : null}
 
-        {granularity === "municipality" && selectedPrefCode && activePref ? (
+        {activeGranularity === "municipality" &&
+        selectedPrefCode &&
+        activePref ? (
           <div className="mb-3">
             <p className="text-xs text-slate-500">
               <button
@@ -281,9 +310,9 @@ export function MapApp({
           </div>
         ) : null}
 
-        <MapLegend className="mb-4" items={legendItems} />
+        <MapLegend className="mb-4" items={legendItems} palette={palette} />
 
-        {granularity === "municipality" && selectedPrefCode ? (
+        {activeGranularity === "municipality" && selectedPrefCode ? (
           <MunicipalityMap
             key={selectedPrefCode}
             prefCode={selectedPrefCode}
@@ -292,6 +321,7 @@ export function MapApp({
             selectedCode={selectedMuniCode}
             onSelect={selectMunicipality}
             mapBasePath={municipalityMapBasePath}
+            palette={palette}
           />
         ) : (
           <JapanMap
@@ -302,6 +332,7 @@ export function MapApp({
             onMapStyleChange={setMapStyle}
             selectHint={japanMapHint}
             mapLabel={japanMapLabel}
+            palette={palette}
           />
         )}
 
@@ -325,18 +356,22 @@ export function MapApp({
         <AreaDetail
           record={selected}
           legendLabels={legendLabels}
+          palette={palette}
+          enableMunicipalities={enableMunicipalities}
           heading={
             selected?.level === "municipality"
               ? "選択した市区町村の詳細"
               : "選択した都道府県の詳細"
           }
           emptyText={
-            granularity === "municipality" && !selectedPrefCode
+            activeGranularity === "municipality" && !selectedPrefCode
               ? "市区町村を見る都道府県を、地図または一覧から選んでください。"
               : "地図または一覧から都道府県を選ぶと、ここに詳細が表示されます。"
           }
           action={
-            granularity === "prefecture" && activePref ? (
+            enableMunicipalities &&
+            activeGranularity === "prefecture" &&
+            activePref ? (
               <button
                 type="button"
                 onClick={() => openMunicipalities(activePref.code)}
@@ -360,11 +395,12 @@ export function MapApp({
           description={
             listIsMunicipalities
               ? "地図の代わりに、ここから市区町村を選べます。"
-              : granularity === "municipality"
+              : activeGranularity === "municipality"
                 ? "市区町村地図を開く都道府県を選べます。"
                 : "地図の代わりに、ここから都道府県を選べます。"
           }
           searchable={listIsMunicipalities}
+          palette={palette}
         />
       </div>
 

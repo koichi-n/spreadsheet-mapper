@@ -27,4 +27,8 @@ export {
   STATUS_ORDER,
   getAreaColors,
   getStatusConfig,
+  mapStroke,
+  paletteFromLegend,
+  paintForStatus,
 } from "./lib/status-config";
+export type { StatusPaint, StatusPalette } from "./lib/status-config";

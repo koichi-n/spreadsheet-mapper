@@ -1,12 +1,13 @@
-import { STATUS_CONFIG } from "../lib/status-config";
+import { paintForStatus, type StatusPalette } from "../lib/status-config";
 import type { LegendItem } from "../lib/types";
 
 type MapLegendProps = {
   className?: string;
   items: LegendItem[];
+  palette?: StatusPalette;
 };
 
-export function MapLegend({ className = "", items }: MapLegendProps) {
+export function MapLegend({ className = "", items, palette }: MapLegendProps) {
   if (items.length === 0) return null;
 
   return (
@@ -16,7 +17,7 @@ export function MapLegend({ className = "", items }: MapLegendProps) {
       </h2>
       <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
         {items.map((item) => {
-          const colors = STATUS_CONFIG[item.status];
+          const colors = paintForStatus(item.status, palette);
           return (
             <li
               key={item.status}
