@@ -18,8 +18,8 @@ import {
   type MapStyle,
 } from "../lib/map-style";
 import { PREFECTURES } from "../lib/prefectures";
-import { defaultLegendItems } from "../lib/status-config";
 import type {
+  AreaDataset,
   AreaLevel,
   AreaRecord,
   DataSource,
@@ -32,6 +32,8 @@ export type MapAppProps = {
   fetchedAt: string;
   error: string | null;
   warnings: string[];
+  /** getAreaData が 凡例シートから埋めた項目。地図の上部に出す */
+  legend: LegendItem[];
   title?: string;
   description?: string;
   /** デモ用のページ見出し。団体サイトへ埋め込むときは false */
@@ -46,9 +48,27 @@ export type MapAppProps = {
   /** クライアントから直接渡す場合の上書き */
   loadMunicipalities?: (prefCode: string) => Promise<AreaRecord[]>;
   municipalityMapBasePath?: string;
-  /** 凡例。省略時は A / B / C / D / 情報なし */
-  legend?: LegendItem[];
 };
+
+/** getAreaData の結果を MapApp に渡す。凡例もここに含む */
+export function toMapAppProps(
+  data: Pick<
+    AreaDataset,
+    "prefectures" | "source" | "fetchedAt" | "error" | "warnings" | "legend"
+  >,
+): Pick<
+  MapAppProps,
+  "prefectures" | "source" | "fetchedAt" | "error" | "warnings" | "legend"
+> {
+  return {
+    prefectures: data.prefectures,
+    source: data.source,
+    fetchedAt: data.fetchedAt,
+    error: data.error,
+    warnings: data.warnings,
+    legend: data.legend,
+  };
+}
 
 const GRANULARITY_OPTIONS = [
   { value: "prefecture", label: "都道府県" },
@@ -70,7 +90,7 @@ export function MapApp({
   municipalityMapBasePath = DEFAULT_MUNICIPALITY_MAP_BASE_PATH,
   legend,
 }: MapAppProps) {
-  const legendItems = legend && legend.length > 0 ? legend : defaultLegendItems();
+  const legendItems = legend;
   const legendLabels = Object.fromEntries(
     legendItems.map((item) => [item.status, item.label]),
   ) as Partial<Record<AreaRecord["status"], string>>;

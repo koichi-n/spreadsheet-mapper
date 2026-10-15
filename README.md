@@ -190,6 +190,7 @@ npx vercel --prod # Production
 - 単一の `code` 列でも可。2桁なら都道府県、5桁（または6桁）なら市区町村と判定します
 - 両方の行を混在させられます。都道府県行があれば全国地図の色に使い、市区町村行は市区町村表示に使います。都道府県行がなければ、市区町村の多数派ステータスで全国地図を塗ります
 - `status` は `A` / `B` / `C` / `D`。それ以外や空欄は「情報なし」
+- 地図の凡例は同じスプレッドシートの **`凡例` シート** から読む（既定範囲 `凡例!A:Z`）。1列目が `A` / `B` / `C` / `D`、2列目が画面に出す文言。ヘッダー行（`status`）とメモ行は無視する。地図を増やしても、このシートを置けば同じ位置・同じ読み方で出る
 - `value` は数値。空欄や不正な値は表示上 `—`
 - `source_url` は `http` / `https` のみリンク化する
 - 一部の行だけ壊れても、サイト全体は表示を続ける
@@ -261,7 +262,7 @@ npx spreadsheet-mapper-copy-maps public/municipality-maps
 ```tsx
 // app/maps/[slug]/page.tsx （Server Component）
 import { getAreaData } from "spreadsheet-mapper/server";
-import { MapApp } from "spreadsheet-mapper/client";
+import { MapApp, toMapAppProps } from "spreadsheet-mapper/client";
 
 export default async function Page() {
   const sheet = {
@@ -275,11 +276,7 @@ export default async function Page() {
 
   return (
     <MapApp
-      prefectures={data.prefectures}
-      source={data.source}
-      fetchedAt={data.fetchedAt}
-      error={data.error}
-      warnings={data.warnings}
+      {...toMapAppProps(data)}
       showHeader={false}
       municipalitiesPathTemplate="/api/maps/your-slug/municipalities/{prefCode}"
     />

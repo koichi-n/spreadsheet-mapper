@@ -11,6 +11,7 @@ export type {
 export { STATUS_KEYS } from "./lib/types";
 export type { AreaDataOptions } from "./lib/area-data-options";
 export type { MapAppProps } from "./components/MapApp";
+export { toMapAppProps } from "./components/MapApp";
 export type {
   MunicipalityMapData,
   MunicipalityMapLocation,

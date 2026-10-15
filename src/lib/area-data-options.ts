@@ -5,6 +5,8 @@ export type AreaDataOptions = {
   useMockData?: boolean;
   sheetId?: string;
   sheetRange?: string;
+  /** 凡例シート。省略時は `凡例!A:Z` */
+  legendSheetRange?: string;
   serviceAccountEmail?: string;
   privateKey?: string;
   cacheSeconds?: number;
@@ -14,6 +16,7 @@ export type ResolvedAreaDataOptions = {
   useMockData: boolean;
   sheetId: string;
   sheetRange: string;
+  legendSheetRange: string;
   serviceAccountEmail: string;
   privateKey: string;
   cacheSeconds: number;
@@ -42,6 +45,8 @@ export function resolveAreaDataOptions(
       options.sheetRange?.trim() ||
       process.env.GOOGLE_SHEET_RANGE?.trim() ||
       APP_CONFIG.sheetRange,
+    legendSheetRange:
+      options.legendSheetRange?.trim() || APP_CONFIG.legendSheetRange,
     serviceAccountEmail:
       options.serviceAccountEmail ??
       process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim() ??

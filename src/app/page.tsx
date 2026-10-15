@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { APP_CONFIG } from "@/lib/app-config";
-import { MapApp } from "@/client";
+import { MapApp, toMapAppProps } from "@/client";
 import { getAreaData } from "@/server";
 
 export const runtime = "nodejs";
@@ -14,13 +14,6 @@ export const metadata: Metadata = {
 export default async function Page() {
   const data = await getAreaData();
   return (
-    <MapApp
-      prefectures={data.prefectures}
-      source={data.source}
-      fetchedAt={data.fetchedAt}
-      error={data.error}
-      warnings={data.warnings}
-      legend={data.legend}
-    />
+    <MapApp {...toMapAppProps(data)} />
   );
 }

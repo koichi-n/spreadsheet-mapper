@@ -52,13 +52,12 @@ function emptyMunicipality(
   };
 }
 
-const LEGEND_SHEET_RANGE = "凡例!A:Z";
-
 async function loadLegend(options: AreaDataOptions): Promise<LegendItem[]> {
+  const resolved = resolveAreaDataOptions(options);
   try {
     const rows = await fetchSheetRows({
       ...options,
-      sheetRange: LEGEND_SHEET_RANGE,
+      sheetRange: resolved.legendSheetRange,
     });
     const parsed = parseLegendRows(rows);
     if (parsed.length > 0) return parsed;
