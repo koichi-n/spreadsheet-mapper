@@ -44,9 +44,9 @@
   "dependencies": {
     "@svg-maps/japan": "^2.0.0",
     "google-auth-library": "^11.0.2",
-    "next": "16.3.4",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "next": "16.4.3",
+    "react": "19.2.9",
+    "react-dom": "19.2.9"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -55,7 +55,7 @@
     "@types/react-dom": "^19",
     "d3-geo": "^3.1.1",
     "eslint": "^9",
-    "eslint-config-next": "16.3.4",
+    "eslint-config-next": "16.4.3",
     "jpn-atlas": "^1.0.2",
     "tailwindcss": "^4",
     "topojson-client": "^3.1.0",
