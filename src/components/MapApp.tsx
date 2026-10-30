@@ -53,6 +53,11 @@ export type MapAppProps = {
    * 都道府県データのみの埋め込み向け。既定は true。
    */
   enableMunicipalities?: boolean;
+  /**
+   * 開いたときに選んでおく都道府県コード。
+   * `prefectures` にそのコードがあるときだけ使う。
+   */
+  initialPrefCode?: string | null;
 };
 
 const GRANULARITY_OPTIONS = [
@@ -75,6 +80,7 @@ export function MapApp({
   municipalityMapBasePath = DEFAULT_MUNICIPALITY_MAP_BASE_PATH,
   enableMunicipalities = true,
   legend,
+  initialPrefCode = null,
 }: MapAppProps) {
   const legendItems = legend;
   const legendLabels = Object.fromEntries(
@@ -85,11 +91,18 @@ export function MapApp({
     [legendItems],
   );
   const [granularity, setGranularity] = useState<AreaLevel>("prefecture");
-  const [selectedPrefCode, setSelectedPrefCode] = useState<string | null>(null);
+  const [selectedPrefCode, setSelectedPrefCode] = useState<string | null>(() =>
+    initialPrefCode && prefectures[initialPrefCode] ? initialPrefCode : null,
+  );
   const [selectedMuniCode, setSelectedMuniCode] = useState<string | null>(null);
   const [mapStyle, setMapStyle] = useState<MapStyle>(MAP_STYLE);
   const [muniRecords, setMuniRecords] = useState<AreaRecord[]>([]);
   const [muniError, setMuniError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!initialPrefCode || selectedPrefCode !== initialPrefCode) return;
+    scrollDetailIntoView();
+  }, [initialPrefCode, selectedPrefCode]);
+
   const loadMunicipalitiesRef = useRef(loadMunicipalities);
   loadMunicipalitiesRef.current = loadMunicipalities;
   const municipalitiesPathTemplateRef = useRef(municipalitiesPathTemplate);
